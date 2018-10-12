@@ -37,7 +37,7 @@ namespace: pagerduty
 
 (def interactives
   (hash
-   ("search" (hash (description: "Search all incidents for pattern") (usage: "search <keyword>") (count: 1)))))
+   ("incidents" (hash (description: "Search all incidents for pattern") (usage: "incidents") (count: 0)))))
 
 (def (main . args)
   (if (null? args)
@@ -123,6 +123,15 @@ namespace: pagerduty
       ;;        (pregexp-replace "\n" (append-strings results) "\t"))
       "N/A")))
 
+(def (do-get-generic uri headers)
+  (let* ((reply (http-get uri
+			  headers: headers))
+	 (status (request-status reply))
+	 (text (request-text reply)))
+    (print-curl "get" uri "" "")
+    (if (success? status)
+      text
+      (displayln (format "Error: got ~a on request. text: ~a~%" status text)))))
 
 (def (default-headers token)
   [
@@ -133,8 +142,25 @@ namespace: pagerduty
 
 (def (incidents)
   (let-hash (load-config)
-    (let* ((url (format "~a/incidents?time_zone=PDT" .url))
-	   (results (do-get-generic url (default-headers .basic-auth))))
+    (let* ((url (format "~a/incidents?time_zone=UTC" .url))
+	   (results (do-get-generic url (default-headers .token))))
       (displayln results))))
 
-#curl -X GET --header 'Accept: application/vnd.pagerduty+json;version=2' --header 'Authorization: Token token=y_NbAkKc66ryYTWUXYEu' 'https://api.pagerduty.com/incidents?time_zone=UTC'
+(def (print-curl type uri headers data)
+  ;;(displayln headers)
+  (let ((heads "Content-type: application/json")
+	(do-curl (getenv "DEBUG" #f)))
+    (when do-curl
+      (cond
+       ((string=? type "get")
+	(if (string=? "" data)
+	  (displayln (format "curl -X GET -H \'~a\' ~a" heads uri))
+	  (displayln (format "curl -X GET -H \'~a\' -d \'~a\' ~a" heads data uri))))
+       ((string=? type "put")
+	(displayln (format "curl -X PUT -H \'~a\' -d \'~a\' ~a" heads data uri)))
+       ((string=? type "post")
+	(displayln (format "curl -X POST -H \'~a\' -d \'~a\' ~a" heads data uri)))
+       ((string=? type "delete")
+	(displayln (format "curl -X DELETE -H \'~a\' -d \'~a\' ~a" heads data uri)))
+       (else
+	(displayln "unknown format " type))))))
