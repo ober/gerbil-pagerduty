@@ -37,7 +37,10 @@ namespace: pagerduty
 
 (def interactives
   (hash
-   ("incidents" (hash (description: "Search all incidents for pattern") (usage: "incidents") (count: 0)))))
+   ("create" (hash (description: "Return information on incident") (usage: "create <title> <message>") (count: 2)))
+   ("incident" (hash (description: "Return information on incident") (usage: "incident <incident number>") (count: 1)))
+   ("incidents" (hash (description: "Show all open incidents") (usage: "incidents") (count: 0)))
+   ))
 
 (def (main . args)
   (if (null? args)
@@ -133,6 +136,7 @@ namespace: pagerduty
       text
       (displayln (format "Error: got ~a on request. text: ~a~%" status text)))))
 
+
 (def (default-headers token)
   [
    ["Accept" :: "application/vnd.pagerduty+json;version=2" ]
@@ -142,7 +146,13 @@ namespace: pagerduty
 
 (def (incidents)
   (let-hash (load-config)
-    (let* ((url (format "~a/incidents?time_zone=UTC" .url))
+    (let* ((url (format "~a/incidents?time_zone=UTC&statuses[]=resolved" .url))
+	   (results (do-get-generic url (default-headers .token))))
+      (displayln results))))
+
+(def (incident id)
+  (let-hash (load-config)
+    (let* ((url (format "~a/incidents/~a?time_zone=UTC" .url id))
 	   (results (do-get-generic url (default-headers .token))))
       (displayln results))))
 
