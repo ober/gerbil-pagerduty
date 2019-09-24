@@ -6,15 +6,26 @@ namespace: pagerduty
 (declare (not optimize-dead-definitions))
 (import
   :gerbil/gambit
+  :gerbil/gambit/ports
   :scheme/base
+  :std/crypto/cipher
+  :std/crypto/etc
+  :std/crypto/libcrypto
+  :std/db/dbi
+  :std/debug/heap
+  :std/iter
+  :std/error
   :std/format
   :std/generic
   :std/generic/dispatch
   :std/misc/channel
+  :std/misc/list
   :std/misc/ports
   :std/net/address
   :std/net/request
+  :std/net/uri
   :std/pregexp
+  :std/srfi/1
   :std/srfi/13
   :std/srfi/19
   :std/srfi/95
@@ -23,8 +34,8 @@ namespace: pagerduty
   :std/text/json
   :std/text/utf8
   :std/text/yaml
-  :std/db/dbi
-  :std/db/sqlite
+  :std/text/zlib
+  :std/xml/ssax
   )
 
 (def config-file "~/.pagerduty.yaml")
@@ -40,6 +51,7 @@ namespace: pagerduty
    ("create" (hash (description: "Return information on incident") (usage: "create <title> <message>") (count: 2)))
    ("incident" (hash (description: "Return information on incident") (usage: "incident <incident number>") (count: 1)))
    ("incidents" (hash (description: "Show all open incidents") (usage: "incidents") (count: 0)))
+   ("incidents-range" (hash (description: "Show all open incidents for range") (usage: "incidents-range <begin date/time> <end date/time>") (count: 2)))
    ))
 
 (def (main . args)
@@ -65,7 +77,6 @@ namespace: pagerduty
        (hash-put! config (string->symbol k) v))
      (car (yaml-load config-file)))
     config))
-
 
 (def (usage-verb verb)
   (let ((howto (hash-get interactives verb)))
@@ -138,11 +149,28 @@ namespace: pagerduty
 
 
 (def (default-headers token)
-  [
-   ["Accept" :: "application/vnd.pagerduty+json;version=2" ]
+  [["Accept" :: "application/vnd.pagerduty+json;version=2" ]
    ["Content-type" :: "application/json"]
-   ["Authorization" :: (format "Token token=~a" token) ]
-   ])
+   ["Authorization" :: (format "Token token=~a" token) ]])
+
+(def (incidents-range begin end)
+  "Fetch all incidents between begin and end.
+   Date/time format as 2018-09-10T10:12:14 or partial"
+  (let-hash (load-config)
+    (let* ((url (format "~a/incidents?since=~a&until=~a&time_zone=~a&limit=200" .url begin end .time_zone))
+           (results (do-get-generic url (default-headers .token)))
+           (data (from-json results)))
+      (displayln "| Incident | Created At| Title | Description | Team | Url |")
+      (displayln "|----------|")
+      (let-hash data
+        (for (incident .incidents)
+             (let-hash incident
+               (displayln "|" .?incident_number
+                          "|" .?created_at
+                          "|" .?title
+                          "|" .?description
+                          "|" (if (table? .?escalation_policy) (let-hash .escalation_policy .summary) #f)
+                          "|" .?html_url)))))))
 
 (def (incidents)
   (let-hash (load-config)
