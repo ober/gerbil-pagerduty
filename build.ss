@@ -8,14 +8,16 @@
 
 (def build-spec
   '("pagerduty"
-    (exe: "pagerduty" "-ld-options" "-lyaml -lssl -lz -L/usr/local/lib/" "-cc-options" "-I/usr/local/include")
+    (exe: "pagerduty" "-ld-options" "-lyaml -lz -L/usr/local/lib/" "-cc-options" "-I/usr/local/include")
     ))
 
 (def build-spec-static
   '("pagerduty"
     (static-exe: "pagerduty"
                  "-ld-options" "-lyaml -lssl -lz -L/usr/local/lib"
-                 "-prelude" "(declare (not safe))")))
+                 "-prelude" "(declare (not safe))"
+                 "-cc-options" "-I/usr/local/include"
+                 )))
 
 (def srcdir
   (path-normalize (path-directory (this-source-file))))
