@@ -5,4 +5,4 @@
 
 (defbuild-script
   '("pagerduty/client"
-    (exe: "pagerduty/pd")))
+    (exe: "pagerduty/pagerduty")))
