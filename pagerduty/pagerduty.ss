@@ -2,7 +2,6 @@
 ;;; © ober
 ;;; Pagerduty client binary
 
-
 (import
   :gerbil/gambit
   :gerbil/gambit/ports
@@ -62,7 +61,7 @@
 	(set! count 0))
       (unless (= (length args2) count)
 	(usage-verb verb))
-      (apply (eval (string->symbol (string-append "pagerduty#" verb))) args2))))
+      (apply (eval (string->symbol (string-append "ober/pagerduty/client#" verb))) args2))))
 
 (def (usage-verb verb)
   (let ((howto (hash-get interactives verb)))
