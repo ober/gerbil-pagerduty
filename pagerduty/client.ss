@@ -63,7 +63,7 @@
     (let* ((url (format "~a/incidents?since=~a&until=~a&time_zone=~a&limit=200" .url begin end .time_zone))
            (results (do-get-generic url (default-headers .token)))
            (data (from-json results))
-           (outs [ "Incident" "Created At" "Title" "Description" "Team" "Url" ]))
+           (outs [[ "Incident" "Created At" "Title" "Description" "Team" "Url" ]]))
       (let-hash data
         (for (incident .incidents)
              (let-hash incident
