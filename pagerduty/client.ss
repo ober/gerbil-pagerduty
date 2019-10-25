@@ -1,5 +1,6 @@
-;; -*- Gerbil -*-
-
+;;; -*- Gerbil -*-
+;;; © ober
+;;; Pagerduty client library
 
 (import
   :gerbil/gambit
@@ -61,18 +62,18 @@
   (let-hash (load-config)
     (let* ((url (format "~a/incidents?since=~a&until=~a&time_zone=~a&limit=200" .url begin end .time_zone))
            (results (do-get-generic url (default-headers .token)))
-           (data (from-json results)))
-      (displayln "| Incident | Created At| Title | Description | Team | Url |")
-      (displayln "|----------|")
+           (data (from-json results))
+           (outs [ "Incident" "Created At" "Title" "Description" "Team" "Url" ]))
       (let-hash data
         (for (incident .incidents)
              (let-hash incident
-               (displayln "|" .?incident_number
-                          "|" .?created_at
-                          "|" .?title
-                          "|" .?description
-                          "|" (if (table? .?escalation_policy) (let-hash .escalation_policy .summary) #f)
-                          "|" .?html_url)))))))
+               (set! outs (cons [ .?incident_number
+                                  .?created_at
+                                  .?title
+                                  .?description
+                                  (if (table? .?escalation_policy) (let-hash .escalation_policy .summary) #f)
+                                  .?html_url ] outs)))))
+      (style-output outs))))
 
 (def (incidents)
   (let-hash (load-config)
