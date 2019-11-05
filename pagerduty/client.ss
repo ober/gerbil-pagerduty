@@ -59,29 +59,56 @@
   "Fetch all incidents between begin and end.
    Date/time format as 2018-09-10T10:12:14 or partial"
   (let-hash (load-config)
-    (let* ((url (format "~a/incidents?since=~a&until=~a&time_zone=~a&limit=200" .url begin end .time_zone))
-           (results (do-get-generic url (default-headers .token)))
-           (data (from-json results))
-           (outs [[ "Incident" "Created At" "Title" "Description" "Team" "Url" ]]))
-      (let-hash data
-        (for (incident .incidents)
-             (let-hash incident
-               (set! outs (cons [ .?incident_number
-                                  .?created_at
-                                  .?title
-                                  .?description
-                                  (if (table? .?escalation_policy) (let-hash .escalation_policy .summary) #f)
-                                  .?html_url ] outs)))))
-      (style-output outs))))
+    (process-incidents (format "~a/incidents?since=~a&until=~a&time_zone=~a&limit=100" .url begin end .time_zone)) ))
 
 (def (incidents)
+  "Fetch all active incidents"
   (let-hash (load-config)
-    (let* ((url (format "~a/incidents?time_zone=UTC&statuses[]=resolved" .url))
-	   (results (do-get-generic url (default-headers .token))))
-      (displayln results))))
+    (process-incidents (format "~a/incidents?time_zone=UTC&statuses[]=resolved" .url))))
+
+(def (process-incidents url)
+  (let-hash (load-config)
+    (let ((outs [[ "Incident" "Created At" "Title" "Description" "Team" "Url" ]]))
+      (let lp ((offset 0))
+        (let* ((offset-url (format "~a&offset=~a" url offset))
+               (results (do-get-generic offset-url (default-headers .token)))
+               (data (from-json results)))
+          (dp results)
+          (let-hash data
+            (for (incident .incidents)
+                 (let-hash incident
+                   (set! outs (cons [ .?incident_number
+                                      .?created_at
+                                      .?title
+                                      .?description
+                                      (if (table? .?escalation_policy) (let-hash .escalation_policy .summary) #f)
+                                      .?html_url ]
+                                    outs))))
+            (when .?more
+              (lp (+ offset 100))))))
+    (style-output outs))))
 
 (def (incident id)
   (let-hash (load-config)
-    (let* ((url (format "~a/incidents/~a?time_zone=UTC" .url id))
-	   (results (do-get-generic url (default-headers .token))))
-      (displayln results))))
+    (process-incidents (format "~a/incidents/~a?time_zone=UTC" .url id))))
+
+(def (users)
+  (let-hash (load-config)
+    (let ((outs [[ "Name" "Email" "Role" "Team" ]]))
+      (let lp ((offset 0))
+        (let* ((url (format "~a/users?offset=~a&limit=100" .url offset))
+               (results (do-get-generic url (default-headers .token)))
+               (data (from-json results)))
+          (let-hash data
+            (for (user .users)
+                 (let-hash user
+                   (set! outs (cons [ .?name
+                                      .?email
+                                      .?role
+                                      (when (table? .?teams)
+                                        (let-hash .teams
+                                          .summary))
+                                      ] outs))))
+            (when .?more
+              (lp (+ offset 100))))))
+      (style-output outs))))
