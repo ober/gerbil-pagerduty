@@ -37,9 +37,11 @@
 
 (export #t)
 
-(declare (not optimize-dead-definitions))
-(def config-file "~/.pagerduty.yaml")
 (import (rename-in :gerbil/gambit/os (current-time builtin-current-time)))
+
+(declare (not optimize-dead-definitions))
+
+(def config-file "~/.pagerduty.yaml")
 (def program-name "pagerduty")
 
 (def (load-config)
@@ -86,7 +88,7 @@
                                     outs))))
             (when .?more
               (lp (+ offset 100))))))
-    (style-output outs))))
+      (style-output outs))))
 
 (def (incident id)
   (let-hash (load-config)
