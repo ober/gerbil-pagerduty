@@ -69,6 +69,7 @@
     (exit 2)))
 
 (def (usage)
+  (displayln (format "Pagerduty: version ~a" version))
   (displayln "Usage: pagerduty <verb>")
   (displayln "Verbs:")
   (for-each
