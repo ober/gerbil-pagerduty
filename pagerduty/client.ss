@@ -104,7 +104,8 @@
                (data (from-json results)))
           (let-hash data
             (for (user .users)
-                 (let-hash user
+              (dp (hash->list user))
+              (let-hash user
                    (set! outs (cons [ .?name
                                       .?email
                                       .?role
@@ -115,3 +116,14 @@
             (when .?more
               (lp (+ offset 100))))))
       (style-output outs))))
+
+(def (create-user email full-name)
+  (let-hash (load-config)
+    (let* ((user (json-object->string
+                  (hash
+                   ("name" full-name)
+                   ("email" email)
+                   ("password" "lala1234"))))
+           (url (format "~a/users" .url))
+           (results (do-post url (default-headers .token) user)))
+      (displayln results))))

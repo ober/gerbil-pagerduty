@@ -40,7 +40,7 @@
 
 (def interactives
   (hash
-   ("create" (hash (description: "Return information on incident") (usage: "create <title> <message>") (count: 2)))
+   ("create-user" (hash (description: "Create New User") (usage: "create-user <email-address> <full name>") (count: 2)))
    ("incident" (hash (description: "Return information on incident") (usage: "incident <incident number>") (count: 1)))
    ("incidents" (hash (description: "Show all open incidents") (usage: "incidents") (count: 0)))
    ("incidents-range" (hash (description: "Show all open incidents for range") (usage: "incidents-range <begin date/time> <end date/time>") (count: 2)))
