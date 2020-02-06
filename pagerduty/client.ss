@@ -73,22 +73,23 @@
   (let-hash (load-config)
     (let ((outs [[ "Incident" "Created At" "Title" "Description" "Team" "Url" ]]))
       (let lp ((offset 0))
-        (let* ((offset-url (format "~a&offset=~a" url offset))
-               (results (do-get-generic offset-url (default-headers .token)))
-               (data (from-json results)))
-          (dp results)
-          (let-hash data
-            (for (incident .incidents)
-                 (let-hash incident
-                   (set! outs (cons [ .?incident_number
-                                      .?created_at
-                                      .?title
-                                      .?description
-                                      (if (table? .?escalation_policy) (let-hash .escalation_policy .summary) #f)
-                                      .?html_url ]
-                                    outs))))
-            (when .?more
-              (lp (+ offset 100))))))
+        (let (offset-url (format "~a&offset=~a" url offset))
+          (with ([ status body ] (rest-call 'get url (default-headers .token)))
+            (unless status
+              (error body))
+            (when (table? body)
+              (let-hash body
+                (for (incident .incidents)
+                  (let-hash incident
+                    (set! outs (cons [ .?incident_number
+                                       .?created_at
+                                       .?title
+                                       .?description
+                                       (if (table? .?escalation_policy) (let-hash .escalation_policy .summary) #f)
+                                       .?html_url ]
+                                     outs))))
+                (when .?more
+                  (lp (+ offset 100))))))))
       (style-output outs))))
 
 (def (incident id)
@@ -99,31 +100,35 @@
   (let-hash (load-config)
     (let ((outs [[ "Name" "Email" "Role" "Team" ]]))
       (let lp ((offset 0))
-        (let* ((url (format "~a/users?offset=~a&limit=100" .url offset))
-               (results (do-get-generic url (default-headers .token)))
-               (data (from-json results)))
-          (let-hash data
-            (for (user .users)
-              (dp (hash->list user))
-              (let-hash user
-                   (set! outs (cons [ .?name
-                                      .?email
-                                      .?role
-                                      (when (table? .?teams)
-                                        (let-hash .teams
-                                          .summary))
-                                      ] outs))))
-            (when .?more
-              (lp (+ offset 100))))))
+        (let (url (format "~a/users?offset=~a&limit=100" .url offset))
+          (with ([ status body ] (rest-call 'get url (default-headers .token)))
+            (unless status
+              (error body))
+            (when (table? body)
+              (let-hash body
+                (for (user .users)
+                  (dp (hash->list user))
+                  (let-hash user
+                    (set! outs (cons [ .?name
+                                       .?email
+                                       .?role
+                                       (when (table? .?teams)
+                                         (let-hash .teams
+                                           .summary))
+                                       ] outs))))
+                (when .?more
+                  (lp (+ offset 100))))))))
       (style-output outs))))
 
 (def (create-user email full-name)
   (let-hash (load-config)
-    (let* ((user (json-object->string
-                  (hash
-                   ("name" full-name)
-                   ("email" email)
-                   ("password" "lala1234"))))
-           (url (format "~a/users" .url))
-           (results (do-post url (default-headers .token) user)))
-      (displayln results))))
+    (let ((user (json-object->string
+                 (hash
+                  ("name" full-name)
+                  ("email" email)
+                  ("password" "lala1234"))))
+          (url (format "~a/users" .url)))
+      (with ([ status body ] (rest-call 'post url (default-headers .token)))
+        (unless status
+          (error body))
+        (present-item body)))))
