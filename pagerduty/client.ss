@@ -74,22 +74,24 @@
     (let ((outs [[ "Incident" "Created At" "Title" "Description" "Team" "Url" ]]))
       (let lp ((offset 0))
         (let (offset-url (format "~a&offset=~a" url offset))
-          (with ([ status body ] (rest-call 'get url (default-headers .token)))
+          (with ([ status body ] (rest-call 'get offset-url (default-headers .token)))
             (unless status
               (error body))
             (when (table? body)
               (let-hash body
-                (for (incident .incidents)
-                  (let-hash incident
-                    (set! outs (cons [ .?incident_number
-                                       .?created_at
-                                       .?title
-                                       .?description
-                                       (if (table? .?escalation_policy) (let-hash .escalation_policy .summary) #f)
-                                       .?html_url ]
-                                     outs))))
-                (when .?more
-                  (lp (+ offset 100))))))))
+                (when (and .?incidents
+                           (list? .?incidents))
+                  (for (incident .incidents)
+                    (let-hash incident
+                      (set! outs (cons [ .?incident_number
+                                         .?created_at
+                                         .?title
+                                         .?description
+                                         (if (table? .?escalation_policy) (let-hash .escalation_policy .summary) #f)
+                                         .?html_url ]
+                                       outs))))
+                  (when .?more
+                    (lp (+ offset 100)))))))))
       (style-output outs))))
 
 (def (incident id)
