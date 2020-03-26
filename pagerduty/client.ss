@@ -58,6 +58,20 @@
    ["Content-type" :: "application/json"]
    ["Authorization" :: (format "Token token=~a" token) ]])
 
+(def (incidents-last-secs secs)
+  "Fetch incidents from (now - secs) to now."
+  (let ((start (date->string (epoch->date (float->int (- (time->seconds (builtin-current-time)) secs))) "~Y-~m-~dT00"))
+        (end (date->string (epoch->date (float->int (time->seconds (builtin-current-time)))) "~Y-~m-~dT00")))
+    (incidents-range start end)))
+
+(def (incidents-last-day)
+  "Fetch incidents for last 24 hours"
+  (incidents-last-secs (* 24 3600)))
+
+(def (incidents-last-hour)
+  "Fetch incidents for last hour"
+  (incidents-last-secs 3600))
+
 (def (incidents-range begin end)
   "Fetch all incidents between begin and end.
    Date/time format as 2018-09-10T10:12:14 or partial"

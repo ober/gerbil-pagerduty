@@ -42,6 +42,9 @@
   (hash
    ("create-user" (hash (description: "Create New User") (usage: "create-user <email-address> <full name>") (count: 2)))
    ("incident" (hash (description: "Return information on incident") (usage: "incident <incident number>") (count: 1)))
+   ("incidents-last-day" (hash (description: "List incidents from last 24 hours") (usage: "incident-last-day") (count: 0)))
+   ("incidents-last-hour" (hash (description: "List incidents from last hour") (usage: "incident-last-hour") (count: 0)))
+   ("incidents-last-secs" (hash (description: "Return information on incidents during last secs") (usage: "incident-last-secs <seconds>") (count: 1)))
    ("incidents" (hash (description: "Show all open incidents") (usage: "incidents") (count: 0)))
    ("incidents-range" (hash (description: "Show all open incidents for range") (usage: "incidents-range <begin date/time> <end date/time>") (count: 2)))
    ("users" (hash (description: "List all users in your Pagerduty Account") (usage: "users") (count: 0)))))
