@@ -128,9 +128,15 @@
                     (set! outs (cons [ .?name
                                        .?email
                                        .?role
-                                       (when (table? .?teams)
-                                         (let-hash .teams
-                                           .summary))
+                                       (when (pair? .?teams)
+                                         (let ((sum []))
+                                           (for (t .teams)
+                                             (when (table? t)
+                                               (let-hash t
+                                                 (when .?summary
+                                                   (set! sum (cons .summary sum))))))
+                                           (if sum
+                                             (string-join sum ", "))))
                                        ] outs))))
                 (when .?more
                   (lp (+ offset 100))))))))
