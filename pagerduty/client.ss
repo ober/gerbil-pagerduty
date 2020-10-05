@@ -38,7 +38,7 @@
 (export #t)
 
 (import (rename-in :gerbil/gambit/os (current-time builtin-current-time)))
-(def version "0.06")
+(def version "0.08")
 
 (declare (not optimize-dead-definitions))
 
@@ -61,8 +61,8 @@
 (def (incidents-last-secs secs-ago)
   "Fetch incidents from (now - secs) to now."
   (let* ((secs (any->int secs-ago))
-         (start (date->string (epoch->date (float->int (- (time->seconds (builtin-current-time)) secs))) "~Y-~m-~dT00"))
-         (end (date->string (epoch->date (float->int (time->seconds (builtin-current-time)))) "~Y-~m-~dT00")))
+         (start (date->string (epoch->date (float->int (- (time->seconds (builtin-current-time)) secs))) "~Y-~m-~dT~H:~M:~S~z"))
+         (end (date->string (epoch->date (float->int (time->seconds (builtin-current-time)))) "~Y-~m-~dT~H:~M:~S~z")))
     (incidents-range start end)))
 
 (def (incidents-last-day)
@@ -77,7 +77,7 @@
   "Fetch all incidents between begin and end.
    Date/time format as 2018-09-10T10:12:14 or partial"
   (let-hash (load-config)
-    (process-incidents (format "~a/incidents?since=~a&until=~a&time_zone=~a&limit=100" .url begin end .time_zone)) ))
+    (process-incidents (format "~a/incidents?since=~a&until=~a&time_zone=~a&limit=100" .url begin end .time_zone))))
 
 (def (incidents)
   "Fetch all active incidents"
