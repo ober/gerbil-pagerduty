@@ -38,7 +38,7 @@
 (export #t)
 
 (import (rename-in :gerbil/gambit/os (current-time builtin-current-time)))
-(def version "0.08")
+(def version "0.09")
 
 (declare (not optimize-dead-definitions))
 
