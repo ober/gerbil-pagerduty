@@ -1,4 +1,4 @@
-;;; -*- Gerbil -*-
+;; -*- Gerbil -*-
 ;;; © ober
 ;;; Pagerduty client library
 
@@ -38,7 +38,7 @@
 (export #t)
 
 (import (rename-in :gerbil/gambit/os (current-time builtin-current-time)))
-(def version "0.09")
+(def version "0.10")
 
 (declare (not optimize-dead-definitions))
 
@@ -92,7 +92,7 @@
           (with ([ status body ] (rest-call 'get offset-url (default-headers .token)))
             (unless status
               (error body))
-            (when (table? body)
+            (if (table? body)
               (let-hash body
                 (when (and .?incidents
                            (list? .?incidents))
@@ -106,7 +106,8 @@
                                          .?html_url ]
                                        outs))))
                   (when .?more
-                    (lp (+ offset 100)))))))))
+                    (lp (+ offset 100)))))
+              (set! outs "")))))
       (style-output outs))))
 
 (def (incident id)
@@ -124,7 +125,6 @@
             (when (table? body)
               (let-hash body
                 (for (user .users)
-                  (dp (hash->list user))
                   (let-hash user
                     (set! outs (cons [ .?name
                                        .?email
