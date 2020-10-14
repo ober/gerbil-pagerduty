@@ -38,7 +38,7 @@
 (export #t)
 
 (import (rename-in :gerbil/gambit/os (current-time builtin-current-time)))
-(def version "0.10")
+(def version "0.11")
 
 (declare (not optimize-dead-definitions))
 
@@ -107,7 +107,10 @@
                                        outs))))
                   (when .?more
                     (lp (+ offset 100)))))
-              (set! outs "")))))
+              (begin
+                (set! outs "")
+                (pi body))
+                ))))
       (style-output outs))))
 
 (def (incident id)
