@@ -2,7 +2,6 @@
 ;;; © ober
 ;;; Pagerduty client library
 
-
 (import
   :gerbil/gambit
   :ober/oberlib
@@ -20,8 +19,7 @@
   :std/sugar
   :std/text/base64
   :std/text/json
-  :std/text/yaml
-)
+  :std/text/yaml)
 
 (export #t)
 
@@ -117,22 +115,32 @@
               (let-hash body
                 (for (user .users)
                   (let-hash user
-                    (set! outs (cons [ .?name
-                                       .?email
-                                       .?role
-                                       (when (pair? .?teams)
-                                         (let ((sum []))
-                                           (for (t .teams)
-                                             (when (table? t)
-                                               (let-hash t
-                                                 (when .?summary
-                                                   (set! sum (cons .summary sum))))))
-                                           (if sum
-                                             (string-join sum ", "))))
-                                       ] outs))))
+                    (displayln "doing " .?name)
+                    (let ((teams (element-for-each .?teams 'summary)))
+                      (set! outs (cons [ .?name
+                                         .?email
+                                         .?role
+                                         teams
+                                         ] outs)))))
                 (when .?more
                   (lp (+ offset 100))))))))
       (style-output outs))))
+
+(def (element-for-each items element)
+  (when (pair? items)
+    (let ((sum ""))
+      (for (t items)
+        (when (table? t)
+          (let-hash t
+            (let ((value (hash-ref t element))
+                  (pre (if (> (string-length sum) 0)
+                         ", "
+                         "")))
+              (when value
+                (set! sum (string-append sum (format "~a~a"  pre value))))))))
+      (if sum
+        (pregexp-replace* ", $" sum "")
+        "None"))))
 
 (def (create-user email full-name)
   (let-hash (load-config)
