@@ -115,8 +115,7 @@
               (let-hash body
                 (for (user .users)
                   (let-hash user
-                    (displayln "doing " .?name)
-                    (let ((teams (element-for-each .?teams 'summary)))
+                    (let ((teams (collect-string .?teams 'summary)))
                       (set! outs (cons [ .?name
                                          .?email
                                          .?role
@@ -126,7 +125,7 @@
                   (lp (+ offset 100))))))))
       (style-output outs))))
 
-(def (element-for-each items element)
+(def (collect-string items element)
   (when (pair? items)
     (let ((sum ""))
       (for (t items)
