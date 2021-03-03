@@ -42,12 +42,15 @@
   (hash
    ("create-user" (hash (description: "Create New User") (usage: "create-user <email-address> <full name>") (count: 2)))
    ("incident" (hash (description: "Return information on incident") (usage: "incident <incident number>") (count: 1)))
+   ("incidents" (hash (description: "Show all open incidents") (usage: "incidents") (count: 0)))
    ("incidents-last-day" (hash (description: "List incidents from last 24 hours") (usage: "incident-last-day") (count: 0)))
    ("incidents-last-hour" (hash (description: "List incidents from last hour") (usage: "incident-last-hour") (count: 0)))
    ("incidents-last-secs" (hash (description: "Return information on incidents during last secs") (usage: "incident-last-secs <seconds>") (count: 1)))
-   ("incidents" (hash (description: "Show all open incidents") (usage: "incidents") (count: 0)))
+   ("incidents-last-week" (hash (description: "Return information on incidents for last week") (usage: "incident-last-week <seconds>") (count: 0)))
    ("incidents-range" (hash (description: "Show all open incidents for range") (usage: "incidents-range <begin YYYYMMDDT00> <end YYYYMMDDT00> ex: pagerduty incidents-range 20200301T00 20200308T00") (count: 2)))
-   ("users" (hash (description: "List all users in your Pagerduty Account") (usage: "users") (count: 0)))))
+   ("report" (hash (description: "Generate Incidents report from definition in ~/.pagerduty.yaml") (usage: "report <name>") (count: 1)))
+   ("users" (hash (description: "List all users in your Pagerduty Account") (usage: "users") (count: 0)))
+   ))
 
 (def (main . args)
   (if (null? args)
