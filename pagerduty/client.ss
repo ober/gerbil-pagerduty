@@ -59,6 +59,10 @@
   "Fetch incidents for last hour"
   (incidents-last-secs 3600))
 
+(def (incidents-last-week)
+  "Fetch incidents for last hour"
+  (incidents-last-secs (* 7 24 3600)))
+
 (def (incidents-range begin end)
   "Fetch all incidents between begin and end.
    Date/time format as 2018-09-10T10:12:14 or partial"
@@ -72,7 +76,7 @@
 
 (def (process-incidents url)
   (let-hash (load-config)
-    (let ((outs [[ "Incident" "Created At" "Title" "Description" "Team" "Url" ]]))
+    (let ((outs [[ "Incident" "Created At" "Title" "Team" "Url" ]]))
       (let lp ((offset 0))
         (let (offset-url (format "~a&offset=~a" url offset))
           (with ([ status body ] (rest-call 'get offset-url (default-headers .token)))
@@ -86,17 +90,16 @@
                     (let-hash incident
                       (set! outs (cons [ .?incident_number
                                          .?created_at
-                                         .?title
-                                         .?description
+                                         (lines-to-spaces .?title)
                                          (if (table? .?escalation_policy) (let-hash .escalation_policy .summary) #f)
                                          .?html_url ]
                                        outs))))
                   (when .?more
                     (lp (+ offset 100)))))
-              (begin
+              (begin(
                 (set! outs "")
                 (pi body))
-                ))))
+              ))))
       (style-output outs))))
 
 (def (incident id)
@@ -153,3 +156,52 @@
         (unless status
           (error body))
         (present-item body)))))
+
+;; (def (converge-template template metas project)
+;;   (if (not (table? template))
+;;     (error-print "Not a table")
+;;     (hash
+;;      (assignee (interpol-from-env (hash-get template "assignee")))
+;;      (description (interpol-from-env (hash-get template "description")))
+;;      (duedate (interpol-from-env (hash-get template "duedate")))
+;;      (issuetype (get-issuetype-id (interpol-from-env (hash-get template "issuetype")) metas))
+;;      (labels [(interpol-from-env (hash-get template "labels"))])
+;;      (originalestimate (interpol-from-env (hash-get template "estimate")))
+;;      (priority (interpol-from-env (hash-get template "priority")))
+;;      (project (interpol-from-env (hash-get template "project")))
+;;      (summary (interpol-from-env (hash-get template "summary"))))))
+
+;; (def (execute-template template metas project)
+;;   (if (not (table? template))
+;;     (begin
+;;       (displayln "Error: execute-template passed non-table :"  template)
+;;       (exit 2)))
+;;   (let ((converged (converge-template template metas project)))
+;;     (let-hash converged
+;;       (let ((parent2 (create-issue (get-project-id .project metas)
+;;                                    .summary
+;;                                    .issuetype
+;;                                    .assignee
+;;                                    .priority
+;;                                    .labels
+;;                                    .originalestimate
+;;                                    .description
+;;                                    .duedate
+;;                                    parent))
+;;             (subtasks (hash-get template "subtasks")))
+;;         (when subtasks
+;;           (for (subtask subtasks)
+;;             (execute-template subtask metas projects parent2)))
+;;         (unless parent
+;;           (displayln "Primary issue: " parent2))))))
+
+;; (def (report creation)
+;;   (let-hash (load-config)
+;;     (if .?reports
+;;       (let ((report (hash-get .reports report)))
+;;         (if report
+;;           (execute-template report metas .project-key #f)
+;;           (begin
+;;             (displayln "Error: could not find an entry for " report " in your ~/.pagerduty.yaml under the reports block")
+;;             (exit 2))))
+;;       (displayln "Error: no create templates defined in ~/.pagerduty.yaml under creations"))))
