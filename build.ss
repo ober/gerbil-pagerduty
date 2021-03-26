@@ -5,5 +5,9 @@
 
 (defbuild-script
   '("pagerduty/client"
-    (static-exe: "pagerduty/pagerduty" "-ld-options" "-lyaml -lssl -lz -L/usr/local/opt/openssl/lib/ -L/usr/local/lib" "-cc-options" "-I/usr/local/opt/openssl/include -I/usr/local/include")))
-    ;;(exe: "pagerduty/pagerduty" "-ld-options" "-lyaml -lssl -lz -L/usr/local/opt/openssl/lib/ -L/usr/local/lib" "-cc-options" "-I/usr/local/opt/openssl/include -I/usr/local/include")))
+    (static-exe:
+     "pagerduty/pagerduty"
+     "-ld-options"
+     "-lyaml -lssl -lz -L/usr/local/opt/openssl/lib/ -L/usr/local/lib"
+     "-cc-options"
+     "-I/usr/local/opt/openssl/include -I/usr/local/include")))

@@ -1,25 +1,34 @@
-.PHONY: pagerduty
+PROJECT := pagerduty
+$(eval uid := $(shell id -u))
+$(eval gid := $(shell id -g))
 
-default: pagerduty
+default: linux-static-docker
 
-SYSTEM := $(shell uname -s)
+deps:
+	$(GERBIL_HOME)/bin/gxpkg install github.com/ober/oberlib
 
-ifeq ($(SYSTEM),Darwin)
-SSL-BASE :=$(lastword $(wildcard /usr/local/Cellar/openssl/*/))
-SED := sed
-MYSQL-BASE := $(lastword $(wildcard /usr/local/Cellar/mysql/*/))
-LIBYAML-BASE := $(lastword $(wildcard /usr/local/Cellar/libyaml/*/))
-else
-LDFLAGS := "-L/usr/lib -lssl -lyaml"
-CPPFLAGS := "-I/usr/include"
-LIBYAML-BASE := "/usr/include"
-SED := sed
-endif
+build: deps
+	$(GERBIL_HOME)/bin/gxpkg link $(PROJECT) /src || true
+	$(GERBIL_HOME)/bin/gxpkg build $(PROJECT)
 
-pagerduty: $(eval CPPFLAGS := "-I$(SSL-BASE)include -I$(LIBYAML-BASE)include -I/usr/local/include")
-pagerduty: $(eval LDFLAGS := "-L$(SSL-BASE)lib -L$(LIBYAML-BASE)lib -lz -lssl -lyaml -L/usr/local/lib")
-pagerduty:
-	gxc -O -o pd -static -exe -g -genv -cc-options $(CPPFLAGS) -ld-options $(LDFLAGS) -gsrc -gsc-flag -keep-c pagerduty/pd.ss
+linux-static-docker:
+	docker run -it \
+	-e GERBIL_PATH=/tmp/.gerbil \
+	-u "$(uid):$(gid)" \
+	-v $(PWD):/src \
+	jaimef/alpine-current:static \
+	make -C /src linux-static
 
-docker:
-	docker run -e GERBIL_PATH=/dd/.gerbil -e PATH='/root/gerbil/bin:/usr/local/gambit/current/bin:/bin:/usr/bin:/sbin:/usr/sbin' -v $PWD:/dd -it jaimef/centos bash -c 'cd /dd && gxc -o dd -cc-options "-Bstatic -DOPENSSL_NO_KRB5 -I/usr/local/include -I/usr/local/ssl/include" -g -gsrc -genv -static -ld-options "-static -L/usr/lib64 -L/usr/local/ssl/lib -lssl -L/usr/local/lib -ldl -lyaml -lz" -exe pagerduty/pagerduty.ss'
+linux-static: build
+	$(GERBIL_HOME)/bin/gxc -o $(PROJECT)-bin -static \
+	-cc-options "-Bstatic" \
+	-g -gsrc -genv \
+	-static \
+	-ld-options "-static -lpthread -L/usr/lib64 -lssl -ldl -lyaml -lz" \
+	-exe $(PROJECT)/$(PROJECT).ss
+
+clean:
+	rm -Rf $(PROJECT)-bin
+
+install:
+	mv $(PROJECT)-bin /usr/local/bin/$(PROJECT)
