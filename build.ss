@@ -7,7 +7,7 @@
   '("pagerduty/client"
     (static-exe:
      "pagerduty/pagerduty"
-     "-ld-options"
-     "-lyaml -lssl -lz -L/usr/local/opt/openssl/lib/ -L/usr/local/lib"
      "-cc-options"
-     "-I/usr/local/opt/openssl/include -I/usr/local/include")))
+     "-I/usr/pkg/include"
+     "-ld-options"
+     "-lpthread -lyaml -ldl -lssl -lz -L/usr/lib64 -L/usr/pkg/lib")))
