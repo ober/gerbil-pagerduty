@@ -23,7 +23,6 @@ linux-static: build
 	$(GERBIL_HOME)/bin/gxc -o $(PROJECT)-bin -static \
 	-cc-options "-Bstatic" \
 	-g -gsrc -genv \
-	-static \
 	-ld-options "-static -lpthread -L/usr/lib64 -lssl -ldl -lyaml -lz" \
 	-exe $(PROJECT)/$(PROJECT).ss
 
