@@ -1,32 +1,25 @@
 PROJECT := pagerduty
-$(eval uid := $(shell id -u))
-$(eval gid := $(shell id -g))
+ARCH := $(shell uname -m)
+DOCKER_IMAGE := "gerbil/gerbilxx:$(ARCH)"
 
 default: linux-static-docker
 
 deps:
-	$(GERBIL_HOME)/bin/gxpkg install github.com/ober/oberlib
+	/opt/gerbil/bin/gxpkg install github.com/ober/oberlib
 
 build: deps
-	$(GERBIL_HOME)/bin/gxpkg link $(PROJECT) /src || true
-	$(GERBIL_HOME)/bin/gxpkg build $(PROJECT)
+	/opt/gerbil/bin/gxpkg link $(PROJECT) /src || true
+	/opt/gerbil/bin/gxpkg build $(PROJECT)
 
 linux-static-docker:
 	docker run -it \
 	-e GERBIL_PATH=/tmp/.gerbil \
-	-u "$(uid):$(gid)" \
 	-v $(PWD):/src \
-	gerbil/alpine \
+	$(DOCKER_IMAGE) \
 	make -C /src linux-static
 
-linux-static: build
-	$(GERBIL_HOME)/bin/gxc -o $(PROJECT)-bin -static \
-	-cc-options "-Bstatic" \
-	-ld-options "-static -lpthread -L/usr/lib64 -lssl -ldl -lyaml -lz" \
-	-exe $(PROJECT)/$(PROJECT).ss
-
 clean:
-	rm -Rf $(PROJECT)-bin
+	rm -rf .gerbil
 
 install:
-	mv $(PROJECT)-bin /usr/local/bin/$(PROJECT)
+	mv .gerbil/bin/$(PROJECT) /usr/local/bin/$(PROJECT)
