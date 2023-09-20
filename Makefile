@@ -14,9 +14,10 @@ build: deps
 linux-static-docker:
 	docker run -it \
 	-e GERBIL_PATH=/tmp/.gerbil \
+	-e USER=$(USER) \
 	-v $(PWD):/src \
 	$(DOCKER_IMAGE) \
-	make -C /src linux-static
+	make -C /src build
 
 clean:
 	rm -rf .gerbil
