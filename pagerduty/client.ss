@@ -12,7 +12,6 @@
   :std/iter
   :std/logger
   :std/misc/list
-  :std/net/websocket
   :std/pregexp
   :std/srfi/13
   :std/srfi/19
