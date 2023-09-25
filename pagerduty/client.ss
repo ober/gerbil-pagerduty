@@ -45,8 +45,8 @@
 (def (incidents-last-secs secs-ago)
   "Fetch incidents from (now - secs) to now."
   (let* ((secs (any->int secs-ago))
-         (start (date->string (epoch->date (float->int (- (time->seconds (builtin-current-time)) secs))) "~Y-~m-~dT~H:~M:~S~z"))
-         (end (date->string (epoch->date (float->int (time->seconds (builtin-current-time)))) "~Y-~m-~dT~H:~M:~S~z")))
+         (start (date->string (epoch->date (float->int (- (time->seconds (current-time)) secs))) "~Y-~m-~dT~H:~M:~S~z"))
+         (end (date->string (epoch->date (float->int (time->seconds (current-time)))) "~Y-~m-~dT~H:~M:~S~z")))
     (incidents-range start end)))
 
 (def (incidents-last-day)
