@@ -5,5 +5,8 @@
 
 (defbuild-script
   '("pagerduty/client"
-    (static-exe:
-     "pagerduty/pagerduty")))
+    (exe:
+     "pagerduty/pagerduty"
+     "-ld-options"
+     "-lyaml"
+     )))
