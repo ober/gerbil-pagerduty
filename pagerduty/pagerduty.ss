@@ -7,8 +7,6 @@
   :gerbil/gambit
   :ober/oberlib
   :std/crypto/cipher
-  :std/crypto/etc
-  :std/crypto/libcrypto
   :std/db/dbi
   :std/debug/heap
   :std/error
