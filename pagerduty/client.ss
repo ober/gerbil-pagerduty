@@ -80,7 +80,7 @@
           (with ([ status body ] (rest-call 'get offset-url (default-headers .token)))
             (unless status
               (error body))
-            (if (table? body)
+            (if (hash-table? body)
               (let-hash body
                 (when (and .?incidents
                            (list? .?incidents))
@@ -89,7 +89,7 @@
                       (set! outs (cons [ .?incident_number
                                          .?created_at
                                          (lines-to-spaces .?title)
-                                         (if (table? .?escalation_policy) (let-hash .escalation_policy .summary) #f)
+                                         (if (hash-table? .?escalation_policy) (let-hash .escalation_policy .summary) #f)
                                          .?html_url ]
                                        outs))))
                   (when .?more
@@ -112,7 +112,7 @@
           (with ([ status body ] (rest-call 'get url (default-headers .token)))
             (unless status
               (error body))
-            (when (table? body)
+            (when (hash-table? body)
               (let-hash body
                 (for (user .users)
                   (let-hash user
@@ -130,7 +130,7 @@
   (when (pair? items)
     (let ((sum ""))
       (for (t items)
-        (when (table? t)
+        (when (hash-table? t)
           (let-hash t
             (let ((value (hash-ref t element))
                   (pre (if (> (string-length sum) 0)
@@ -156,7 +156,7 @@
         (present-item body)))))
 
 ;; (def (converge-template template metas project)
-;;   (if (not (table? template))
+;;   (if (not (hash-table? template))
 ;;     (error-print "Not a table")
 ;;     (hash
 ;;      (assignee (interpol-from-env (hash-get template "assignee")))
@@ -170,7 +170,7 @@
 ;;      (summary (interpol-from-env (hash-get template "summary"))))))
 
 ;; (def (execute-template template metas project)
-;;   (if (not (table? template))
+;;   (if (not (hash-table? template))
 ;;     (begin
 ;;       (displayln "Error: execute-template passed non-table :"  template)
 ;;       (exit 2)))
