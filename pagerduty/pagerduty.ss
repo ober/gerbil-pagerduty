@@ -30,7 +30,7 @@
   :std/text/json
   :std/text/utf8
   :std/text/zlib
-  :std/xml/ssax
+  :std/markdown/sxml
   :ober/pagerduty/client)
 
 (export main)
