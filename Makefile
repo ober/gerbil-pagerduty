@@ -2,6 +2,8 @@ PROJECT := pagerduty
 ARCH := $(shell uname -m)
 PWD := $(shell pwd)
 DOCKER_IMAGE := "gerbil/gerbilxx:$(ARCH)-master"
+UID := $(shell id -u)
+GID := $(shell id -g)
 
 default: linux-static-docker
 
@@ -9,13 +11,12 @@ deps:
 	/opt/gerbil/bin/gxpkg install github.com/ober/oberlib
 
 build: deps
-	git config --global --add safe.directory /src
 	/opt/gerbil/bin/gxpkg link $(PROJECT) /src || true
 	/opt/gerbil/bin/gxpkg build -R $(PROJECT)
 
 linux-static-docker:
 	docker run -t \
-	-e GERBIL_PATH=/src/.gerbil \
+	-u "$(UID):$(GID)" \
 	-v $(PWD):/src \
 	$(DOCKER_IMAGE) \
 	make -C /src build
