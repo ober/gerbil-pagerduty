@@ -7,10 +7,15 @@ GID := $(shell id -g)
 
 default: linux-static-docker
 
+check-root:
+	@if [ "${UID}" -eq 0 ]; then \
+	git config --global --add safe.directory /src; \
+	fi
+
 deps:
 	/opt/gerbil/bin/gxpkg install github.com/ober/oberlib
 
-build: deps
+build: deps check-root
 	/opt/gerbil/bin/gxpkg link $(PROJECT) /src || true
 	/opt/gerbil/bin/gxpkg build -R $(PROJECT)
 
