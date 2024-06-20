@@ -22,7 +22,7 @@ linux-static-docker:
 	make -C /src build
 
 clean:
-	rm -rf .gerbil
+	rm -rf .gerbil manifest.ss
 
 install:
 	mv .gerbil/bin/$(PROJECT) /usr/local/bin/$(PROJECT)
